@@ -90,20 +90,28 @@ Will run the video at 48 FPS. The default FPS is 60.
 ### Model Architecture and Training Strategy
 
 #### 1. Solution Design Approach
+My Model Based on Nvidia Model you can find the details [https://devblogs.nvidia.com/deep-learning-self-driving-cars/](https://devblogs.nvidia.com/deep-learning-self-driving-cars/)
 
-The overall strategy for deriving a model architecture was to ...
+![alt text][image1]
 
-My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
+*  #### Lambda Layers
 
-In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
+In Keras,  [lambda layers](https://keras.io/layers/core/#lambda)  can be used to create arbitrary functions that operate on each image as it passes through the layer.
 
-To combat the overfitting, I modified the model so that ...
+That lambda layer could take each pixel in an image and run it through the formulas:
+`pixel_normalized = pixel / 255`
+`pixel_mean_centered = pixel_normalized - 0.5`
 
-Then I ... 
+In this project, a lambda layer is a convenient way to parallelize image normalization. The lambda layer will also ensure that the model will normalize input images when making predictions in  `drive.py`.
 
-The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track... to improve the driving behavior in these cases, I ....
+* #### Cropping2D Layer
 
-At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
+Keras provides the  [Cropping2D layer](https://keras.io/layers/convolutional/#cropping2d)  for image cropping within the model. This is relatively fast, because the model is parallelized on the GPU, so many images are cropped simultaneously.
+
+By contrast, image cropping outside the model on the CPU is relatively slow.
+
+Also, by adding the cropping layer, the model will automatically crop the input images when making predictions in  `drive.py`.
+
 
 #### 2. Final Model Architecture
 
@@ -111,9 +119,11 @@ The final model architecture (model.py lines 105 - 170) consisted of a convoluti
 
 Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
 
-![alt text][image1]
+![alt text][image4]
 
 #### 3. Creation of the Training Set & Training Process
+
+
 
 To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
 
